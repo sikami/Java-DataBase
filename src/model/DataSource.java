@@ -11,16 +11,29 @@ public class DataSource {
     public static final String COLUMN_ALBUMS_ID = "_id";
     public static final String COLUMN_ALBUM_NAME = "name";
     public static final String COLUMN_ALBUMS_ARTIST = "artist";
+    public static final int INDEX_ALBUM_ID = 1;
+    public static final int INDEX_ALBUM_NAME = 2;
+    public static final int INDEX_ALBUM_ARTIST = 3;
 
     public static final String ARTIST_ID = "_id";
     public static final String TABLE_ARTIST = "artists";
     public static final String ARTIST_NAME = "name";
+    public static final int INDEX_ARTIST_ID = 1;
+    public static final int INDEX_ARTIST_NAME = 2;
 
     public static final String TABLE_SONGS = "songs";
     public static final String SONGS_ID = "_id";
     public static final String SONGS_TRACK = "track";
     public static final String SONGS_TITLE = "title";
     public static final String SONGS_ALBUM = "album";
+    public static final int INDEX_SONGS_ID = 1;
+    public static final int INDEX_SONGS_TRACK = 2;
+    public static final int INDEX_SONGS_TITLE = 3;
+    public static final int INDEX_SONGS_ALBUM = 4;
+
+    public static final int ORDER_BY_NONE = 1;
+    public static final int ORDER_BY_ASC = 2;
+    public static final int ORDER_BY_DESC = 3;
 
     private Connection conn;
 
@@ -47,15 +60,29 @@ public class DataSource {
         }
     }
 
-    public List<Artist> queryArtist() {
+    public List<Artist> queryArtist(int sortOrder) {
+        StringBuilder stringBuilder = new StringBuilder("SELECT * FROM ");
+        stringBuilder.append(TABLE_ARTIST);
+        if(sortOrder != ORDER_BY_NONE) {
+            stringBuilder.append(" ORDER BY ");
+            stringBuilder.append(ARTIST_NAME);
+            stringBuilder.append(" COLLATE NOCASE ");
+            if(sortOrder == ORDER_BY_DESC) {
+                stringBuilder.append("DESC");
+            } else {
+                stringBuilder.append("ASC");
+            }
+        }
+
+
         try (Statement statement = conn.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + TABLE_ARTIST + " ORDER BY " + ARTIST_NAME)) {
+             ResultSet resultSet = statement.executeQuery(stringBuilder.toString())) {
 
             List<Artist> artists = new ArrayList<>();
             while (resultSet.next()) {
                 Artist artist = new Artist();
-                artist.setId(resultSet.getInt(ARTIST_ID));
-                artist.setName(resultSet.getString(ARTIST_NAME));
+                artist.setId(resultSet.getInt(INDEX_ARTIST_ID));
+                artist.setName(resultSet.getString(INDEX_ARTIST_NAME));
                 artists.add(artist);
             }
 

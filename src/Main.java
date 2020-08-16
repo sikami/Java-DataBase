@@ -10,7 +10,7 @@ public class Main {
             System.out.println("Can't open datasource");
             return;
         }
-        List<Artist> artistList = dataSource.queryArtist();
+        List<Artist> artistList = dataSource.queryArtist(DataSource.ORDER_BY_ASC);
         if(artistList == null) {
             System.out.println("No artist");
             return;
