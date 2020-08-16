@@ -1,5 +1,6 @@
 package model;
 
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,17 @@ public class DataSource {
     public static final int ORDER_BY_NONE = 1;
     public static final int ORDER_BY_ASC = 2;
     public static final int ORDER_BY_DESC = 3;
+
+    public static final String QUERY_ARTIST_FOR_SONG_START = "SELECT " + TABLE_ARTIST + "." + ARTIST_NAME + ", " +
+            TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + ", " + TABLE_SONGS + "." + SONGS_TRACK + " FROM " +
+            TABLE_SONGS + " INNER JOIN " + TABLE_ALBUMS + " ON " + TABLE_SONGS + "." + SONGS_ALBUM + " = " +
+            TABLE_ALBUMS + "." + COLUMN_ALBUMS_ID + " INNER JOIN " + TABLE_ARTIST + " ON " + TABLE_ALBUMS +
+            "." + COLUMN_ALBUMS_ARTIST + " = " + TABLE_ARTIST + "." + ARTIST_ID + " WHERE " + TABLE_SONGS + "." +
+            SONGS_TITLE + " = \"";
+
+    public static final String QUERY_ARTIST_FOR_SONG_SORT = " ORDER BY " + COLUMN_ALBUMS_ARTIST + "." + ARTIST_NAME +
+            ", " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + " COLLATE NOCASE ";
+
 
     public static final String QUERY_ALBUM_BY_ARTIST_START = "SELECT " + TABLE_ALBUMS + '.' + COLUMN_ALBUM_NAME + " FROM " +
             TABLE_ALBUMS + " INNER JOIN " + TABLE_ARTIST + " ON " + TABLE_ALBUMS + "." + COLUMN_ALBUMS_ARTIST +
@@ -131,6 +143,55 @@ public class DataSource {
             return null;
         }
 
+    }
+
+    public List<SongArtist> queryArtistForSong(String songName, int sortOrder) {
+        StringBuilder sb = new StringBuilder(QUERY_ARTIST_FOR_SONG_START);
+        sb.append(songName);
+        sb.append("\"");
+
+        if(sortOrder != ORDER_BY_NONE) {
+            sb.append(QUERY_ALBUMS_BY_ARTIST_SORT);
+            if(sortOrder == ORDER_BY_DESC) {
+                sb.append("DESC");
+            } else {
+                sb.append("ASC");
+            }
+        }
+
+        System.out.println("Sequal statement: " + sb.toString());
+
+        try(Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery(sb.toString())) {
+            List<SongArtist> result = new ArrayList<>();
+
+            while(resultSet.next()) {
+                SongArtist songArtist = new SongArtist();
+                songArtist.setArtistName(resultSet.getString(1));
+                songArtist.setAlbumName(resultSet.getString(2));
+                songArtist.setTrack(resultSet.getInt(3));
+                result.add(songArtist);
+            }
+            return result;
+        } catch(SQLException e) {
+            System.out.println("Query failed: " + e. getMessage());
+            return null;
+        }
+    }
+
+    public void querySongMetaData() {
+        String sql = "SELECT * FROM " + TABLE_SONGS;
+        try(Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery(sql)) {
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            int numColumn = resultSetMetaData.getColumnCount();
+            for (int i = 1; i < numColumn; i++) {
+                System.out.format("Column %d in the songs table is names %s \n", i, resultSetMetaData.getColumnName(i));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Query failed: " + e.getMessage());
+        }
     }
 }
 

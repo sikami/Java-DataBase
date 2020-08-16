@@ -1,6 +1,8 @@
 import model.Artist;
 import model.DataSource;
+import model.SongArtist;
 
+import javax.xml.crypto.Data;
 import java.util.List;
 
 public class Main {
@@ -16,11 +18,21 @@ public class Main {
             return;
         }
 
-        List<String> albumForArtist = dataSource.queryAlbumsForArtist("Iron Maiden", DataSource.ORDER_BY_ASC);
+        List<String> albumForArtist = dataSource.queryAlbumsForArtist("Pink Floyd", DataSource.ORDER_BY_DESC);
         for(String i : albumForArtist) {
             System.out.println(i);
         }
 
+        List<SongArtist> result = dataSource.queryArtistForSong("She's On Fire", DataSource.ORDER_BY_ASC);
+        if(result == null) {
+            System.out.println("Couldn;t find the artist song ");
+            return;
+        }
+        for(SongArtist i: result) {
+            System.out.println(i.getArtistName() + ": " + i.getAlbumName() + ", track: " + i.getTrack());
+        }
+
+        dataSource.querySongMetaData();
         dataSource.close();
     }
 }
