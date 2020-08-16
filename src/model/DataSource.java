@@ -35,6 +35,14 @@ public class DataSource {
     public static final int ORDER_BY_ASC = 2;
     public static final int ORDER_BY_DESC = 3;
 
+    public static final String QUERY_ALBUM_BY_ARTIST_START = "SELECT " + TABLE_ALBUMS + '.' + COLUMN_ALBUM_NAME + " FROM " +
+            TABLE_ALBUMS + " INNER JOIN " + TABLE_ARTIST + " ON " + TABLE_ALBUMS + "." + COLUMN_ALBUMS_ARTIST +
+            " = " + TABLE_ARTIST + "." + ARTIST_ID + " WHERE " + TABLE_ARTIST + "." + ARTIST_NAME + " = \"";
+
+    public static final String QUERY_ALBUMS_BY_ARTIST_SORT = " ORDER BY " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + " COLLATE NOCASE ";
+
+    public static final String QUERY_ARTIST = "SELECT * FROM " + TABLE_ARTIST;
+
     private Connection conn;
 
     public boolean open() {
@@ -61,8 +69,8 @@ public class DataSource {
     }
 
     public List<Artist> queryArtist(int sortOrder) {
-        StringBuilder stringBuilder = new StringBuilder("SELECT * FROM ");
-        stringBuilder.append(TABLE_ARTIST);
+        StringBuilder stringBuilder = new StringBuilder(QUERY_ARTIST);
+
         if(sortOrder != ORDER_BY_NONE) {
             stringBuilder.append(" ORDER BY ");
             stringBuilder.append(ARTIST_NAME);
@@ -92,6 +100,37 @@ public class DataSource {
             System.out.println("Query failed " + e.getMessage());
             return null;
         }
+    }
+
+    public List<String> queryAlbumsForArtist(String artistName, int sortOrder) {
+        StringBuilder stringBuilder = new StringBuilder(QUERY_ALBUM_BY_ARTIST_START);
+        stringBuilder.append(artistName);
+        stringBuilder.append("\"");
+
+        if(sortOrder != ORDER_BY_NONE) {
+            stringBuilder.append(QUERY_ALBUMS_BY_ARTIST_SORT);
+            if(sortOrder == ORDER_BY_DESC) {
+                stringBuilder.append("DESC");
+            } else {
+                stringBuilder.append("ASC");
+            }
+        }
+
+        System.out.println("SQL statement: " + stringBuilder.toString());
+
+        try(Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery(stringBuilder.toString())){
+            List<String> albums = new ArrayList<>();
+            while(resultSet.next()) {
+                albums.add(resultSet.getString(1));
+            }
+            return albums;
+
+        } catch (SQLException e) {
+            System.out.println("Query failed: " + e.getMessage());
+            return null;
+        }
+
     }
 }
 

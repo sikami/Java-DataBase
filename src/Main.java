@@ -16,8 +16,9 @@ public class Main {
             return;
         }
 
-        for(Artist i : artistList) {
-            System.out.println(i.getId() + ", Name: " + i.getName());
+        List<String> albumForArtist = dataSource.queryAlbumsForArtist("Iron Maiden", DataSource.ORDER_BY_ASC);
+        for(String i : albumForArtist) {
+            System.out.println(i);
         }
 
         dataSource.close();
