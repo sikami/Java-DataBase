@@ -33,6 +33,10 @@ public class Main {
         }
 
         dataSource.querySongMetaData();
+        int count = dataSource.getCount(DataSource.TABLE_SONGS);
+        System.out.println("songs is: " + count);
+
+        dataSource.insertSong("Touch of Grey", "Grateful Dead", "in the dark", 1);
         dataSource.close();
     }
 }
